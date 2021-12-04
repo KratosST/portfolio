@@ -130,20 +130,6 @@ function initMap() {
         map.data.revertStyle();
     });
 
-    const fs = require('fs');
-    // console.log(document.getElementById("file-input"));
-    console.log("load js");
-    const file = fs.createReadStream('./refined_data.csv');
-    console.log("read file");
-
-    // var count = 0;
-    Papa.parse(file, {
-        download: true,
-        complete: function(result) {
-            console.log("complete");
-        }
-    })
-
     map.data.addListener("click", (mapsMouseEvent) => {
         // map.setZoom(8);
         // map.setCenter(marker.getPosition());
@@ -164,32 +150,65 @@ function initMap() {
     const heatmapDataByTime = {};
     // const dataByRegion = {};
 
-    Promise.all([
-        d3.csv("./refined_data.csv")
-    ]).then (function(array) {
-        results = array[0];
-        results.forEach(function(d){
-            var date = (new Date(d["timestamp"] * 1000)).toISOString().slice(0, 10);
-            const latLng = new google.maps.LatLng(d["lat"], d["long"]);
+    // const fs = require('fs');
+    // console.log(document.getElementById("file-input"));
+    // const file = fs.createReadStream('refined_data.csv');
+    // var count = 0;
+    Papa.parse("https://raw.githubusercontent.com/KratosST/kratosst.github.io/main/refined_data.csv", {
+        download: true,
+        complete: function(results) {
+            array = results.data; 
+            array.forEach(function(d, i){
+                if (i > 0) {
+                    var date = (new Date(d[0] * 1000)).toISOString().slice(0, 10);
+                    const latLng = new google.maps.LatLng(d[1], d[2]);
 
-            // TODO: draw color by region
-            if ((date in heatmapData) == false) {
-                heatmapData[date] = [{location: latLng, weight: 0.1}];
-                heatmapDataByTime[date] = [new Date(d["timestamp"] * 1000)];
-            } else {
-                heatmapData[date].push({location: latLng, weight: 0.1});
-                heatmapDataByTime[date].push(new Date(d["timestamp"] * 1000));
-            }
+                    // TODO: draw color by region
+                    if ((date in heatmapData) == false) {
+                        heatmapData[date] = [{location: latLng, weight: 0.1}];
+                        heatmapDataByTime[date] = [new Date(d[0] * 1000)];
+                    } else {
+                        heatmapData[date].push({location: latLng, weight: 0.1});
+                        heatmapDataByTime[date].push(new Date(d[0] * 1000));
+                    }
+                }
+            });
 
-        });
+            heatmap = new google.maps.visualization.HeatmapLayer({
+                data: heatmapData[time.toISOString().slice(0, 10)],
+                dissipating: false,
+                map: map,
+                radius: 2 * 10 ** (map.getZoom()-15),
+            });
+        }
+    })
 
-        heatmap = new google.maps.visualization.HeatmapLayer({
-            data: heatmapData[time.toISOString().slice(0, 10)],
-            dissipating: false,
-            map: map,
-            radius: 2 * 10 ** (map.getZoom()-15),
-        });
-    });
+    // Promise.all([
+    //     d3.csv("./refined_data.csv")
+    // ]).then (function(array) {
+    //     results = array[0];
+    //     results.forEach(function(d){
+    //         var date = (new Date(d["timestamp"] * 1000)).toISOString().slice(0, 10);
+    //         const latLng = new google.maps.LatLng(d["lat"], d["long"]);
+
+    //         // TODO: draw color by region
+    //         if ((date in heatmapData) == false) {
+    //             heatmapData[date] = [{location: latLng, weight: 0.1}];
+    //             heatmapDataByTime[date] = [new Date(d["timestamp"] * 1000)];
+    //         } else {
+    //             heatmapData[date].push({location: latLng, weight: 0.1});
+    //             heatmapDataByTime[date].push(new Date(d["timestamp"] * 1000));
+    //         }
+
+    //     });
+
+    //     heatmap = new google.maps.visualization.HeatmapLayer({
+    //         data: heatmapData[time.toISOString().slice(0, 10)],
+    //         dissipating: false,
+    //         map: map,
+    //         radius: 2 * 10 ** (map.getZoom()-15),
+    //     });
+    // });
 
 
     // Create a <script> tag and set the USGS URL as the source.
@@ -199,4 +218,3 @@ function initMap() {
     // document.getElementsByTagName("head")[0].appendChild(script);
 
 }
-
