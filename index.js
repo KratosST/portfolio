@@ -102,15 +102,15 @@ function initMap() {
         "./json/City_of_Atlanta_Neighborhood_Statistical_Areas.json"
     );
 
-    define(function (require) {
-        PolygonLookup = require('polygon-lookup');
-    });
+    // define(function (require) {
+    //     PolygonLookup = require('polygon-lookup');
+    // });
     // const PolygonLookup = require('polygon-lookup');
 
     map.data.setStyle(function(feature) {
-        var lookup = new PolygonLookup(feature);
-        var poly = lookup.search(33.7756, -84.3963);
-        console.log(poly);
+        // var lookup = new PolygonLookup(feature);
+        // var poly = lookup.search(33.7756, -84.3963);
+        // console.log(poly);
         // console.log(d3.geoContains(feature, { lat: 33.7756, lng: -84.3963 }));
         // var ascii = feature.getProperty('ascii');
         // var color = ascii > 91 ? 'red' : 'blue';
