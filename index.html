@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+
     <title>Crime Map Visualization</title>
 
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
@@ -8,10 +11,12 @@
     <script src="./lib/d3.v5.min.js"></script>
     <script src="./lib/d3-dsv.min.js"></script>
     <script src="./lib/d3-simple-slider.min.js"></script>
-    <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
-    <!-- <script src="https://unpkg.com/d3-simple-slider"></script> -->
+    <script src="./lib/papaparse.min.js"></script>
+    <script src="./lib/require.js"></script>
+    <!-- <script src="./lib/jquery-csv.js"></script> -->
     
 
+    <!-- slide bar reference: https://bl.ocks.org/johnwalley/e1d256b81e51da68f7feb632a53c3518 -->
     <style>
       /* Set the size of the div element that contains the map */
       #map {
@@ -20,9 +25,9 @@
         width: 100%;
         /* The width is the width of the web page */
       }
-      #t-Year.tick line{
-        display:false;
+      .axis text {
         visibility:hidden;
+        fill: red;
       }
     </style>
 
@@ -87,12 +92,14 @@
     </script> -->
   </head>
   <body>
+
+    <!-- <textarea data-enable-grammarly="false"></textarea> -->
     <h3>Crime Map Demo</h3>
     <!--The div element for the map -->
     <div id="map"></div>
 
     <div id = "t" class="row align-items-center">
-        <p id="t-Year">Slide to select date:</p><div id="slider-year"></div>
+        <p id="t-Year">Slide to select a previous date:</p><div id="slider-year"></div>
     </div>
 
     <label for="hourSelect">Use hour period: </label>
