@@ -18,7 +18,7 @@ function initMap() {
         .step(1000 * 60 * 60 * 24)
         .width(800)
         .ticks(12)
-        .tickFormat(d3.timeFormat('%y-%m-%d'))
+        .tickFormat(d3.timeFormat('%Y-%m-%d'))
         .tickValues(dataTime)
         .default(new Date(2018, 11, 1))
         .on('onchange', show);
@@ -28,9 +28,12 @@ function initMap() {
             .remove();
         time = sliderTime.value();
         // console.log(time.toISOString().slice(0, 10));
-        heatmap.setData(heatmapData[time.toISOString().slice(0, 10)]);
-        heatmap.setOptions({radius: 0.1});
-        // heatmap.setMap();
+        if (time.toISOString().slice(0, 10) in heatmapData) {
+            heatmap.setData(heatmapData[time.toISOString().slice(0, 10)]);
+            heatmap.setOptions({radius: 2 * 10 ** (map.getZoom()-15) });
+        } else {
+            heatmap.setData([]);
+        }
     }
 
     var gTime = d3
@@ -75,8 +78,9 @@ function initMap() {
                     }
                 }
             }
-            heatmap.setData(heatmapByHour);
-            heatmap.setOptions({radius: 10});
+            // heatmap.setData(heatmapByHour);
+            // heatmap.setOptions({radius: 10});
+
             console.log(heatmapByHour.length);
         }
     })
@@ -98,12 +102,15 @@ function initMap() {
         "./json/City_of_Atlanta_Neighborhood_Statistical_Areas.json"
     );
 
-    // const PolygonLookup = require('polygon-lookup')
+    define(function (require) {
+        PolygonLookup = require('polygon-lookup');
+    });
+    // const PolygonLookup = require('polygon-lookup');
 
     map.data.setStyle(function(feature) {
-        // var lookup = new PolygonLookup(featureCollection);
-        // var poly = lookup.search(33.7756, -84.3963);
-        // console.log(poly);
+        var lookup = new PolygonLookup(feature);
+        var poly = lookup.search(33.7756, -84.3963);
+        console.log(poly);
         // console.log(d3.geoContains(feature, { lat: 33.7756, lng: -84.3963 }));
         // var ascii = feature.getProperty('ascii');
         // var color = ascii > 91 ? 'red' : 'blue';
@@ -123,8 +130,35 @@ function initMap() {
         map.data.revertStyle();
     });
 
-    // var results = Papa.parse(file);
-    // var results = Papa.parse("refined_data.csv");
+    const fs = require('fs');
+    // console.log(document.getElementById("file-input"));
+    console.log("load js");
+    const file = fs.createReadStream('./refined_data.csv');
+    console.log("read file");
+
+    // var count = 0;
+    Papa.parse(file, {
+        download: true,
+        complete: function(result) {
+            console.log("complete");
+        }
+    })
+
+    map.data.addListener("click", (mapsMouseEvent) => {
+        // map.setZoom(8);
+        // map.setCenter(marker.getPosition());
+        // Close the current InfoWindow.
+        // console.log(mapsMouseEvent.latLng.toString());
+        console.log(mapsMouseEvent.latLng.toJSON());
+        // infoWindow.close();
+        // infoWindow = new google.maps.InfoWindow({
+        //     position: mapsMouseEvent.latLng,
+        // });
+        // infoWindow.setContent(
+        //     JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
+        // );
+        // infoWindow.open(map);
+    });
 
     const heatmapData = {};
     const heatmapDataByTime = {};
@@ -153,7 +187,7 @@ function initMap() {
             data: heatmapData[time.toISOString().slice(0, 10)],
             dissipating: false,
             map: map,
-            radius: 0.1,
+            radius: 2 * 10 ** (map.getZoom()-15),
         });
     });
 
@@ -166,19 +200,3 @@ function initMap() {
 
 }
 
-function eqfeed_callback(results) {
-    const heatmapData = [];
-
-    for (let i = 0; i < results.features.length; i++) {
-        const coords = results.features[i].geometry.coordinates;
-        const latLng = new google.maps.LatLng(coords[1], coords[0]);
-
-        heatmapData.push(latLng);
-    }
-
-    const heatmap = new google.maps.visualization.HeatmapLayer({
-        data: heatmapData,
-        dissipating: false,
-        map: map,
-    });
-}
