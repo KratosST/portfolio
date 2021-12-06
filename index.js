@@ -27,11 +27,11 @@ const zoomScale = {
 
 function initMap() {
     var dataTime = d3.range(0, 23).map(function(d) { // 155 months
-        return new Date(2021 + d/12, d%12, 1);
+        return new Date(2020 + d/12, d%12, 1);
     });
 
     var time = new Date(2009, 0, 1);
-    var barTime = new Date(2021, 0, 1);
+    var barTime = new Date(2020, 0, 1);
     var hour = "";
     // var currentTime = new Date(2009, 11, 1);
     // console.log(time);
@@ -40,8 +40,8 @@ function initMap() {
     // slider bottom
     var sliderTime = d3
         .sliderBottom()
-        .min(new Date(2021, 0, 1))
-        .max(new Date(2022, 11, 1))
+        .min(new Date(2020, 0, 1))
+        .max(new Date(2021, 11, 1))
         .step(1000 * 60 * 60 * 24)
         .width(800)
         .ticks(12)
@@ -55,7 +55,7 @@ function initMap() {
         infoWindow.close();
         
         time = sliderTime.value();
-        time.setFullYear(time.getFullYear()-12);
+        time.setFullYear(time.getFullYear()-11);
         if (time.toISOString().slice(0, 10) in heatmapData) {
             heatmapData[time.toISOString().slice(0, 10)].forEach(function(d){
                 if (Array.isArray(d.location)) {
@@ -379,7 +379,7 @@ function get_stkde_map(time, leftUp, gridSize, heatmapData, heatmapDataByTime, h
 function show_string(time, hour, mouseLatLng, feature = null, index, dataByRegion, heatmapDataByRegion, heatmapByHour) {
     var currentTime = new Date(2009, 11, 1);
     var date = time.toISOString().slice(0, 10);
-    showDate = parseInt(date.slice(0,4))+12 + date.slice(4, date.length);
+    showDate = parseInt(date.slice(0,4))+11 + date.slice(4, date.length);
     var latLng = mouseLatLng.toJSON();
     var history = 0, current = 0, location = "outside Atlanta", neighborhood = "N/A", prediction = 0.0, risk = "Safe", hourRange = "whole day";
     const risk_level = {0.0 : ["safe", "#008450"], 0.5 : ["medium", "#EFB700"], 
@@ -388,6 +388,8 @@ function show_string(time, hour, mouseLatLng, feature = null, index, dataByRegio
     if (feature != null) {
         location = feature.NPU + ", " + feature.STATISTICA;
         neighborhood = feature.NEIGHBORHO;
+    } else {
+        index = "N/A";
     }
     if (index in dataByRegion) {
         history = dataByRegion[index].length;
