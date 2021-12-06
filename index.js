@@ -282,7 +282,7 @@ function initMap() {
 
     // get_heatmap(time, leftUp, gridSize, heatmapData, heatmapDataByTime, dataByRegion);
     // get_stkde_map(time, leftUp, gridSize, heatmapData, heatmapDataByTime, heatmapDataByRegion);
-    get_predict_map(time, leftUp, gridSize);
+    get_predict_map(time, leftUp, gridSize, heatmapData, heatmapDataByTime, heatmapDataByRegion);
 
     // Create a <script> tag and set the USGS URL as the source.
     // const script = document.createElement("script");
@@ -377,11 +377,14 @@ function get_stkde_map(time, leftUp, gridSize, heatmapData, heatmapDataByTime, h
     });
 }
 
-function get_predict_map(time, leftUp, gridSize) {
+function get_predict_map(time, leftUp, gridSize, heatmapData, heatmapDataByTime, heatmapDataByRegion) {
     //// Read and parse by d3
-    heatmapData = {};
-    heatmapDataByTime = {};
-    heatmapDataByRegion = {};
+    for (i in ["2009-01-01", "2009-01-02", "2009-01-03","2009-01-04"]) {
+        heatmapData[i] = {};
+        heatmapDataByTime[i] = {};
+        heatmapDataByRegion[i] = {};
+    }
+    
     Promise.all([
         d3.csv("./converted_predict_result.csv")
     ]).then (function(array) {
@@ -411,7 +414,6 @@ function get_predict_map(time, leftUp, gridSize) {
                 heatmapDataByRegion[index] = {};
                 heatmapDataByRegion[index][date] = [d["probability"]];
             }
-
         });
 
         heatmap = new google.maps.visualization.HeatmapLayer({
