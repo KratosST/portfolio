@@ -266,22 +266,23 @@ function initMap() {
         heatmapDataByTime = data["heatmapDataByTime"];
         heatmapDataByRegion = data["heatmapDataByRegion"];
 
-        heatmapData[time.toISOString().slice(0, 10)].forEach(function(d){
-            d.location = new google.maps.LatLng(d.location[0], d.location[1]);
-            d.weight *= 100;
-            d.maxIntensity = 10000;
-        });
-        heatmap = new google.maps.visualization.HeatmapLayer({
-            data: heatmapData[time.toISOString().slice(0, 10)],
-            dissipating: false,
-            map: map,
-            // radius: 3 * 10 ** (map.getZoom()-16),
-            radius: 3.5 * 2 ** (3-map.getZoom()),
-        }) 
+        // heatmapData[time.toISOString().slice(0, 10)].forEach(function(d){
+        //     d.location = new google.maps.LatLng(d.location[0], d.location[1]);
+        //     d.weight *= 100;
+        //     d.maxIntensity = 10000;
+        // });
+        // heatmap = new google.maps.visualization.HeatmapLayer({
+        //     data: heatmapData[time.toISOString().slice(0, 10)],
+        //     dissipating: false,
+        //     map: map,
+        //     // radius: 3 * 10 ** (map.getZoom()-16),
+        //     radius: 3.5 * 2 ** (3-map.getZoom()),
+        // }) 
     });
 
     // get_heatmap(time, leftUp, gridSize, heatmapData, heatmapDataByTime, dataByRegion);
     // get_stkde_map(time, leftUp, gridSize, heatmapData, heatmapDataByTime, heatmapDataByRegion);
+    get_predict_map(time, leftUp, gridSize);
 
     // Create a <script> tag and set the USGS URL as the source.
     // const script = document.createElement("script");
@@ -372,6 +373,55 @@ function get_stkde_map(time, leftUp, gridSize, heatmapData, heatmapDataByTime, h
         });
 
         console.log(heatmapDataByRegion);
+
+    });
+}
+
+function get_predict_map(time, leftUp, gridSize) {
+    //// Read and parse by d3
+    heatmapData = {};
+    heatmapDataByTime = {};
+    heatmapDataByRegion = {};
+    Promise.all([
+        d3.csv("./converted_predict_result.csv")
+    ]).then (function(array) {
+        results = array[0];
+        results.forEach(function(d){
+            var ts = d["timestamp"];
+            var date = (new Date(ts * 1000)).toISOString().slice(0, 10);
+            const latLng = new google.maps.LatLng(d["lat"], d["lon"]);
+
+            var index = Math.floor(Math.abs(leftUp.lat - latLng.toJSON().lat)/gridSize[0]) * 88 + Math.floor(Math.abs(leftUp.lng - latLng.toJSON().lng)/gridSize[1]);
+
+            // console.log(latLng);
+
+            // TODO: draw color by region
+            if ((date in heatmapData) == false) {
+                heatmapData[date] = [{location: latLng, weight: d["probability"]*1}];
+                heatmapDataByTime[date] = [new Date(ts * 1000)];
+            } else {
+                heatmapData[date].push({location: latLng, weight: d["probability"]*1});
+                heatmapDataByTime[date].push(new Date(ts * 1000));
+            }
+
+            if (index in heatmapDataByRegion) {
+                if (date in heatmapDataByRegion[index]) heatmapDataByRegion[index][date].push(d["probability"]);
+                else heatmapDataByRegion[index][date] = [d["probability"]];
+            } else {
+                heatmapDataByRegion[index] = {};
+                heatmapDataByRegion[index][date] = [d["probability"]];
+            }
+
+        });
+
+        heatmap = new google.maps.visualization.HeatmapLayer({
+            data: heatmapData[time.toISOString().slice(0, 10)],
+            dissipating: false,
+            map: map,
+            radius: 1.5 * 2 ** (9-map.getZoom()),
+        });
+
+        // console.log(heatmap.radius);
 
     });
 }
