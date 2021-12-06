@@ -2,6 +2,29 @@
 let map, leftUp, rightBottom, gridSize, hour, time, currentTime, infoWindow;
 let heatmapData, heatmapDataByTime, heatmapByHour, heatmapDataByRegion, dataByRegion, heatmap;
 
+const zoomScale = {
+    20 : 1128.497220,
+    19 : 2256.994440,
+    18 : 4513.988880,
+    17 : 9027.977761,
+    16 : 18055.955520,
+    15 : 36111.911040,
+    14 : 72223.822090,
+    13 : 144447.644200,
+    12 : 288895.288400,
+    11 : 577790.576700,
+    10 : 1155581.153000,
+    9  : 2311162.307000,
+    8  : 4622324.614000,
+    7  : 9244649.227000,
+    6  : 18489298.450000,
+    5  : 36978596.910000,
+    4  : 73957193.820000,
+    3  : 147914387.600000,
+    2  : 295828775.300000,
+    1  : 591657550.500000
+}
+
 function initMap() {
     var dataTime = d3.range(0, 23).map(function(d) { // 155 months
         return new Date(2021 + d/12, d%12, 1);
@@ -28,8 +51,7 @@ function initMap() {
         .on('onchange', show);
 
     function show(){
-        d3.selectAll(".legend")
-            .remove();
+        // d3.selectAll(".legend").remove();
         infoWindow.close();
         
         time = sliderTime.value();
@@ -43,7 +65,8 @@ function initMap() {
                 }
             });
             heatmap.setData(heatmapData[time.toISOString().slice(0, 10)]);
-            heatmap.setOptions({radius: 3 * 10 ** (map.getZoom()-16) });
+            heatmap.setOptions({radius: 3.5 * 2 ** (3-map.getZoom()) });
+            // heatmap.setOptions({radius: 1.5 * 2 ** (map.getZoom()-22) });
             // console.log(time.toISOString().slice(0, 10));
             // console.log(heatmapData[time.toISOString().slice(0, 10)].length);
         } else {
@@ -134,6 +157,10 @@ function initMap() {
     map.data.loadGeoJson(
         "./json/City_of_Atlanta_Neighborhood_Statistical_Areas.json"
     );
+
+    map.addListener("zoom_changed", () => {
+        heatmap.setOptions({radius: 1.5 * 2 ** (3-map.getZoom()) });
+    });
 
     // define(function (require) {
     //     PolygonLookup = require('polygon-lookup');
@@ -248,7 +275,8 @@ function initMap() {
             data: heatmapData[time.toISOString().slice(0, 10)],
             dissipating: false,
             map: map,
-            radius: 3 * 10 ** (map.getZoom()-16),
+            // radius: 3 * 10 ** (map.getZoom()-16),
+            radius: 3.5 * 2 ** (3-map.getZoom()),
         }) 
     });
 
