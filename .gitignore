@@ -1,5 +1,3 @@
-.github/workflows/codeql-analysis.yml
-
 # prefer npm over yarn 
 yarn.lock
 
