@@ -1,11 +1,11 @@
 {
-  "name": "personal-site",
+  "name": "portfolio",
   "version": "3.0.1",
-  "homepage": "https://kratosst.github.io/",
+  "homepage": "https://kratosst.github.io/portfolio",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/KratosST/kratosst.github.io.git"
+    "url": "https://github.com/KratosST/portfolio.git"
   },
   "scripts": {
     "build": "rimraf ./build && react-scripts build",
